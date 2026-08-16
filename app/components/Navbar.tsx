@@ -11,6 +11,7 @@ export default function Navbar() {
     { name: "Favorites", href: "#favorites", icon: "⭐" },
     { name: "Wishlist", href: "#wishlist", icon: "📝" },
     { name: "Library", href: "#game-library", icon: "📚" },
+    { name: "Arcade", href: "/arcade", icon: "🕹️" }, // Added Arcade Link
   ];
 
   return (
