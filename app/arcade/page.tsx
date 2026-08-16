@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
+import { Chess } from "chess.js";
+import { Chessboard } from "react-chessboard";
 
 export default function ArcadePage() {
   const [selectedGame, setSelectedGame] = useState<"tictactoe" | "chess">("tictactoe");
@@ -37,13 +39,13 @@ export default function ArcadePage() {
                 : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-white border border-zinc-800"
             }`}
           >
-            Mini Chess Puzzle
+            Play Chess (vs AI)
           </button>
         </div>
 
         {/* Game Container Area */}
         <div className="bg-zinc-900/60 backdrop-blur-xl border border-zinc-800/80 rounded-3xl p-8 shadow-2xl min-h-[480px] flex flex-col items-center justify-center">
-          {selectedGame === "tictactoe" ? <TicTacToeGame /> : <MiniChessGame />}
+          {selectedGame === "tictactoe" ? <TicTacToeGame /> : <FullChessGame />}
         </div>
       </section>
     </main>
@@ -171,86 +173,82 @@ function TicTacToeGame() {
 }
 
 // ==========================================
-// MINI CHESS MINI-GAME / PUZZLE MODULE
+// FULL CHESS GAME VS AI MODULE
 // ==========================================
-function MiniChessGame() {
-  const [message, setMessage] = useState("Select a White piece to move.");
-  const [selectedPiece, setSelectedPiece] = useState<number | null>(null);
-  
-  const [pieces, setPieces] = useState<Array<{ type: string; player: "white" | "black" } | null>>([
-    { type: "R", player: "black" }, { type: "K", player: "black" }, { type: "R", player: "black" }, null,
-    null, null, null, null,
-    null, null, null, null,
-    { type: "R", player: "white" }, { type: "K", player: "white" }, { type: "R", player: "white" }, null,
-  ]);
+function FullChessGame() {
+  const [game, setGame] = useState(new Chess());
+  const [status, setStatus] = useState("Your turn! Play as White.");
 
-  const handleSquareClick = (index: number) => {
-    const piece = pieces[index];
-    if (selectedPiece === null) {
-      if (piece && piece.player === "white") {
-        setSelectedPiece(index);
-        setMessage(`Selected ${piece.type}. Choose target square.`);
-      }
-    } else {
-      const newPieces = [...pieces];
-      newPieces[index] = newPieces[selectedPiece];
-      newPieces[selectedPiece] = null;
-      setPieces(newPieces);
-      setSelectedPiece(null);
-      setMessage("AI Bot is thinking...");
+  // The AI makes a random valid move
+  function makeRandomMove() {
+    const possibleMoves = game.moves();
 
-      setTimeout(() => {
-        setMessage("Your turn! Move White pieces.");
-      }, 600);
+    // If game is over
+    if (game.isGameOver() || game.isDraw() || possibleMoves.length === 0) {
+      setStatus("Game Over!");
+      return;
     }
-  };
 
-  const resetChess = () => {
-    setPieces([
-      { type: "R", player: "black" }, { type: "K", player: "black" }, { type: "R", player: "black" }, null,
-      null, null, null, null,
-      null, null, null, null,
-      { type: "R", player: "white" }, { type: "K", player: "white" }, { type: "R", player: "white" }, null,
-    ]);
-    setSelectedPiece(null);
-    setMessage("Game reset. Select a White piece.");
-  };
+    const randomIndex = Math.floor(Math.random() * possibleMoves.length);
+    const gameCopy = new Chess(game.fen());
+    gameCopy.move(possibleMoves[randomIndex]);
+    
+    setGame(gameCopy);
+    setStatus("Your turn! Play as White.");
+  }
+
+  // Called when you drag and drop a piece (using 'any' to bypass strict TS literal types)
+  function onDrop(sourceSquare: any, targetSquare: any, piece: any) {
+    if (game.isGameOver()) return false;
+    
+    const gameCopy = new Chess(game.fen());
+    try {
+      const move = gameCopy.move({
+        from: sourceSquare,
+        to: targetSquare,
+        promotion: piece[1]?.toLowerCase() ?? "q", // default promote to queen
+      });
+
+      if (move) {
+        setGame(gameCopy);
+        setStatus("AI Bot is thinking...");
+        setTimeout(makeRandomMove, 400);
+        return true;
+      }
+    } catch (e) {
+      // Illegal move will throw an error, we catch it and reject the drop
+      return false;
+    }
+    
+    return false;
+  }
 
   return (
-    <div className="flex flex-col items-center">
-      <div className="mb-4 text-center">
-        <h3 className="text-lg font-bold text-cyan-400">Mini Tactical Chess vs AI</h3>
-        <p className="text-zinc-400 text-xs mt-1">{message}</p>
+    <div className="flex flex-col items-center w-full max-w-[400px]">
+      <div className="mb-6 text-center">
+        <h3 className="text-xl font-bold text-cyan-400">Chess vs AI Bot</h3>
+        <p className="text-zinc-400 mt-1">{status}</p>
       </div>
 
-      <div className="grid grid-cols-4 gap-2 w-72 h-72 bg-zinc-950 p-3 rounded-2xl border border-zinc-800">
-        {pieces.map((piece, index) => {
-          const isSelected = selectedPiece === index;
-          const isDarkSquare = (Math.floor(index / 4) + (index % 4)) % 2 === 1;
-
-          return (
-            <button
-              key={index}
-              onClick={() => handleSquareClick(index)}
-              className={`w-full h-full rounded-xl flex items-center justify-center text-2xl font-bold transition-all ${
-                isDarkSquare ? "bg-zinc-900" : "bg-zinc-800/60"
-              } ${isSelected ? "ring-2 ring-cyan-400 bg-cyan-950/40" : "hover:bg-zinc-700/50"}`}
-            >
-              {piece && (
-                <span className={piece.player === "white" ? "text-cyan-300 drop-shadow" : "text-rose-400 drop-shadow"}>
-                  {piece.type === "R" ? "♖" : "♔"}
-                </span>
-              )}
-            </button>
-          );
-        })}
+      <div className="w-full bg-zinc-950 p-2 rounded-lg border border-zinc-800 shadow-xl">
+        <Chessboard
+          {...({
+            position: game.fen(),
+            onPieceDrop: onDrop,
+            customDarkSquareStyle: { backgroundColor: '#27272a' },
+            customLightSquareStyle: { backgroundColor: '#52525b' },
+          } as any)}
+        />
       </div>
 
       <button
-        onClick={resetChess}
-        className="mt-6 px-6 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium rounded-xl transition-all border border-zinc-700 text-sm"
+        onClick={() => {
+          setGame(new Chess());
+          setStatus("Your turn! Play as White.");
+        }}
+        className="mt-8 px-6 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium rounded-xl transition-all border border-zinc-700 text-sm"
       >
-        Restart Board
+        Restart Chess Match
       </button>
     </div>
   );
