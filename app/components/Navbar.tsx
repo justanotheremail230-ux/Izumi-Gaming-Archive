@@ -1,126 +1,87 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export default function Navbar() {
-  const [active, setActive] = useState("home");
+  const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY;
-
-      const recentlyPlayed =
-        document.getElementById("recently-played");
-      const favorites =
-        document.getElementById("favorites");
-      const wishlist =
-        document.getElementById("wishlist");
-
-      if (
-        recentlyPlayed &&
-        scrollPosition < recentlyPlayed.offsetTop
-      ) {
-        setActive("home");
-        return;
-      }
-
-      if (
-        wishlist &&
-        scrollPosition >= wishlist.offsetTop
-      ) {
-        setActive("wishlist");
-        return;
-      }
-
-      if (
-        favorites &&
-        scrollPosition >= favorites.offsetTop
-      ) {
-        setActive("favorites");
-        return;
-      }
-
-      if (
-        recentlyPlayed &&
-        scrollPosition >= recentlyPlayed.offsetTop
-      ) {
-        setActive("recently-played");
-        return;
-      }
-
-      setActive("home");
-    };
-
-    window.addEventListener("scroll", handleScroll);
-
-    handleScroll();
-
-    return () =>
-      window.removeEventListener(
-        "scroll",
-        handleScroll
-      );
-  }, []);
-
-  const activeClass =
-    "text-cyan-300 bg-cyan-500/10 shadow-[inset_0_-2px_0_rgba(22,188,249,0.7)]";
-
-  const inactiveClass =
-    "text-zinc-400 hover:text-white hover:bg-white/5";
+  const links = [
+    { name: "Home", href: "#home", icon: "🏠" },
+    { name: "Recently Played", href: "#recently-played", icon: "🎮" },
+    { name: "Favorites", href: "#favorites", icon: "⭐" },
+    { name: "Wishlist", href: "#wishlist", icon: "📝" },
+    { name: "Library", href: "#game-library", icon: "📚" },
+  ];
 
   return (
-    <header className="fixed top-0 left-0 w-full z-50 p-4">
-      <div className="max-w-7xl mx-auto bg-black/40 backdrop-blur-2xl border border-zinc-700/60 rounded-[22px] overflow-hidden shadow-2xl">
+    <div 
+      className="fixed top-6 left-6 z-50"
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
+      {/* Parent container handles the hover events */}
+      
+      {/* Floating Button (Visible when menu is closed) */}
+      <div 
+        className={`transition-all duration-300 ease-in-out ${
+          open ? "opacity-0 scale-95 pointer-events-none" : "opacity-100 scale-100"
+        }`}
+      >
+        <button className="bg-black/60 backdrop-blur-xl border border-cyan-500/20 text-cyan-300 px-4 py-3 rounded-xl shadow-2xl hover:bg-cyan-500/10 cursor-default">
+          ☰ Menu
+        </button>
+      </div>
 
-        <div className="grid grid-cols-4 items-center">
-
-          <a
-            href="#home"
-            className={`h-14 flex items-center justify-center text-sm md:text-base font-medium transition-all duration-300 ${
-              active === "home"
-                ? activeClass
-                : inactiveClass
-            }`}
+      {/* The Sidebar Card (Visible when menu is open) */}
+      <div
+        className={`absolute top-0 left-0 w-72 bg-black/60 backdrop-blur-xl border border-cyan-500/20 rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 ease-in-out origin-top-left ${
+          open
+            ? "opacity-100 translate-x-0 scale-100"
+            : "opacity-0 -translate-x-4 scale-95 pointer-events-none"
+        }`}
+      >
+        {/* HEADER */}
+        <div className="flex items-center gap-3 p-4 border-b border-cyan-500/20">
+          <button
+            onClick={() => setOpen(false)}
+            className="text-zinc-400 hover:text-cyan-300 hover:bg-cyan-500/10 rounded-md px-2 py-1 text-lg transition-colors"
+            aria-label="Close Navigation"
           >
-            Home
-          </a>
-
-          <a
-            href="#recently-played"
-            className={`h-14 flex items-center justify-center text-sm md:text-base font-medium border-l border-zinc-700/40 transition-all duration-300 ${
-              active === "recently-played"
-                ? activeClass
-                : inactiveClass
-            }`}
-          >
-            Recently Played
-          </a>
-
-          <a
-            href="#favorites"
-            className={`h-14 flex items-center justify-center text-sm md:text-base font-medium border-l border-zinc-700/40 transition-all duration-300 ${
-              active === "favorites"
-                ? activeClass
-                : inactiveClass
-            }`}
-          >
-            Favorites
-          </a>
-
-          <a
-            href="#wishlist"
-            className={`h-14 flex items-center justify-center text-sm md:text-base font-medium border-l border-zinc-700/40 transition-all duration-300 ${
-              active === "wishlist"
-                ? activeClass
-                : inactiveClass
-            }`}
-          >
-            Wishlist
-          </a>
-
+            ✕
+          </button>
+          <h2 className="text-cyan-300 font-semibold text-lg tracking-wide m-0">
+            Navigation
+          </h2>
         </div>
 
+        {/* MENU LINKS */}
+        <div className="py-2">
+          {links.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              onClick={() => setOpen(false)}
+              className="
+                flex
+                items-center
+                justify-start
+                gap-4
+                px-6
+                py-3.5
+                text-zinc-300
+                hover:text-cyan-300
+                hover:bg-cyan-500/10
+                transition-all
+                duration-200
+              "
+            >
+              <span className="text-xl">{link.icon}</span>
+              <span className="font-medium">{link.name}</span>
+            </a>
+          ))}
+        </div>
       </div>
-    </header>
+      
+    </div>
   );
 }
