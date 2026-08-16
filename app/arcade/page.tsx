@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Navbar from "../components/Navbar";
 import { Chess } from "chess.js";
 import { Chessboard } from "react-chessboard";
@@ -77,25 +77,6 @@ function TicTacToeGame() {
 
   const winner = calculateWinner(board);
   const isDraw = !winner && board.every((square) => square !== null);
-
-  useEffect(() => {
-    if (gameMode === "ai" && !isXNext && !winner && !isDraw) {
-      const timer = setTimeout(() => {
-        const emptyIndices = board
-          .map((val, idx) => (val === null ? idx : null))
-          .filter((val) => val !== null) as number[];
-
-        if (emptyIndices.length > 0) {
-          const randomIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
-          const newBoard = board.slice();
-          newBoard[randomIndex] = "O";
-          setBoard(newBoard);
-          setIsXNext(true);
-        }
-      }, 400);
-      return () => clearTimeout(timer);
-    }
-  }, [isXNext, board, winner, isDraw, gameMode]);
 
   const handleClick = (index: number) => {
     if (board[index] || winner) return;
@@ -179,47 +160,51 @@ function FullChessGame() {
   const [game, setGame] = useState(new Chess());
   const [status, setStatus] = useState("Your turn! Play as White.");
 
-  // The AI makes a random valid move
-  function makeRandomMove() {
-    const possibleMoves = game.moves();
+  // Helper to make a move safely using latest chess.js methods
+  function makeAMove(move: { from: string; to: string; promotion?: string }) {
+    try {
+      const gameCopy = new Chess(game.fen());
+      const result = gameCopy.move(move);
+      if (result) {
+        setGame(gameCopy);
+        return result;
+      }
+    } catch (e) {
+      return null;
+    }
+    return null;
+  }
 
-    // If game is over
+  // AI makes a random move
+  function makeRandomMove() {
+    const possibleMoves = game.moves({ verbose: true });
     if (game.isGameOver() || game.isDraw() || possibleMoves.length === 0) {
       setStatus("Game Over!");
       return;
     }
-
     const randomIndex = Math.floor(Math.random() * possibleMoves.length);
-    const gameCopy = new Chess(game.fen());
-    gameCopy.move(possibleMoves[randomIndex]);
+    const randomMove = possibleMoves[randomIndex];
     
-    setGame(gameCopy);
+    makeAMove({
+      from: randomMove.from,
+      to: randomMove.to,
+      promotion: "q",
+    });
     setStatus("Your turn! Play as White.");
   }
 
-  // Called when you drag and drop a piece
-  function onDrop(sourceSquare: any, targetSquare: any, piece: any) {
-    if (game.isGameOver()) return false;
-    
-    const gameCopy = new Chess(game.fen());
-    try {
-      const move = gameCopy.move({
-        from: sourceSquare,
-        to: targetSquare,
-        promotion: piece[1]?.toLowerCase() ?? "q",
-      });
+  function onDrop(sourceSquare: any, targetSquare: any) {
+    const move = makeAMove({
+      from: sourceSquare,
+      to: targetSquare,
+      promotion: "q",
+    });
 
-      if (move) {
-        setGame(gameCopy);
-        setStatus("AI Bot is thinking...");
-        setTimeout(makeRandomMove, 400);
-        return true;
-      }
-    } catch (e) {
-      return false;
-    }
-    
-    return false;
+    if (move === null) return false;
+
+    setStatus("AI Bot is thinking...");
+    setTimeout(makeRandomMove, 300);
+    return true;
   }
 
   return (
