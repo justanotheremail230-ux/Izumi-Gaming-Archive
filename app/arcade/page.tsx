@@ -197,7 +197,7 @@ function FullChessGame() {
     setStatus("Your turn! Play as White.");
   }
 
-  // Called when you drag and drop a piece (using 'any' to bypass strict TS literal types)
+  // Called when you drag and drop a piece
   function onDrop(sourceSquare: any, targetSquare: any, piece: any) {
     if (game.isGameOver()) return false;
     
@@ -206,7 +206,7 @@ function FullChessGame() {
       const move = gameCopy.move({
         from: sourceSquare,
         to: targetSquare,
-        promotion: piece[1]?.toLowerCase() ?? "q", // default promote to queen
+        promotion: piece[1]?.toLowerCase() ?? "q",
       });
 
       if (move) {
@@ -216,7 +216,6 @@ function FullChessGame() {
         return true;
       }
     } catch (e) {
-      // Illegal move will throw an error, we catch it and reject the drop
       return false;
     }
     
@@ -231,10 +230,11 @@ function FullChessGame() {
       </div>
 
       <div className="w-full bg-zinc-950 p-2 rounded-lg border border-zinc-800 shadow-xl">
-        <Chessboard
+        <Chessboard 
           {...({
             position: game.fen(),
             onPieceDrop: onDrop,
+            boardOrientation: "white",
             customDarkSquareStyle: { backgroundColor: '#27272a' },
             customLightSquareStyle: { backgroundColor: '#52525b' },
           } as any)}
