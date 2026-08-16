@@ -5,7 +5,8 @@ import FadeInSection from "./components/FadeInSection";
 import GameCard from "./components/GameCard";
 import DecryptTitle from "./components/DecryptTitle";
 import SocialHUD from "./components/SocialHUD";
-import MemoriesSection from "./components/MemoriesSection"; // NEW: Memories import
+import MemoriesSection from "./components/MemoriesSection";
+import SpotifyWidget from "./components/SpotifyWidget"; // NEW: Spotify widget import
 
 // Batch fetch IGDB covers & summaries for all sections in 1 single call
 async function getBatchGameData(gameNames: string[]) {
@@ -107,7 +108,7 @@ export default async function Home() {
   // ==========================================
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-black via-zinc-950 to-black text-white">
+    <main className="min-h-screen bg-gradient-to-b from-black via-zinc-950 to-black text-white relative">
       <Navbar />
 
       {/* HERO */}
@@ -226,6 +227,9 @@ export default async function Home() {
           <SearchableGameGrid games={libraryWithData} />
         </section>
       </FadeInSection>
+
+      {/* FLOATING SPOTIFY WIDGET */}
+      <SpotifyWidget />
     </main>
   );
 }
