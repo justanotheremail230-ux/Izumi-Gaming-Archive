@@ -160,9 +160,9 @@ function FullChessGame() {
   const [game, setGame] = useState(new Chess());
   const [status, setStatus] = useState("Your turn! Play as White.");
 
-  // Helper to make a move safely using latest chess.js methods
   function makeAMove(move: { from: string; to: string; promotion?: string }) {
     try {
+      // Create a fresh instance based on current FEN to properly validate and execute moves
       const gameCopy = new Chess(game.fen());
       const result = gameCopy.move(move);
       if (result) {
@@ -175,7 +175,6 @@ function FullChessGame() {
     return null;
   }
 
-  // AI makes a random move
   function makeRandomMove() {
     const possibleMoves = game.moves({ verbose: true });
     if (game.isGameOver() || game.isDraw() || possibleMoves.length === 0) {
