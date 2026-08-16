@@ -1,3 +1,22 @@
+export const recentlyPlayed = [
+  { title: "Assassin's Creed Odyssey", subtitle: "Recently Played" },
+  { title: "Assassin's Creed III", subtitle: "Recently Played" },
+  { title: "Battlefield 4", subtitle: "Recently Played" },
+];
+
+export const favoriteGames = [
+  { title: "Red Dead Redemption 2", subtitle: "Favorite" },
+  { title: "Assassin's Creed Odyssey", subtitle: "Favorite" },
+  { title: "Need for Speed: Most Wanted (2005)", subtitle: "Favorite" },
+  { title: "Hogwarts Legacy", subtitle: "Favorite" },
+];
+
+export const wishlistGames = [
+  { title: "Grand Theft Auto VI", subtitle: "Wishlist" },
+  { title: "Black Myth: Wukong", subtitle: "Wishlist" },
+  { title: "Ghost of Tsushima", subtitle: "Wishlist" },
+];
+
 export const games = [
   { title: "Assassin's Creed", genre: "Action Adventure", year: 2024, rating: 5 },
   { title: "Assassin's Creed II", genre: "Action Adventure", year: 2024, rating: 5 },

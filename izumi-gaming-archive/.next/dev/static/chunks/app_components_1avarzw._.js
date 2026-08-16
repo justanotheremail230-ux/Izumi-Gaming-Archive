@@ -200,9 +200,11 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/index.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$render$2f$components$2f$motion$2f$proxy$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/framer-motion/dist/es/render/components/motion/proxy.mjs [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$components$2f$AnimatePresence$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/framer-motion/dist/es/components/AnimatePresence/index.mjs [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$image$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/image.js [app-client] (ecmascript)");
 ;
 var _s = __turbopack_context__.k.signature();
 "use client";
+;
 ;
 ;
 function SearchableGameGrid({ games }) {
@@ -210,15 +212,50 @@ function SearchableGameGrid({ games }) {
     const [search, setSearch] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])("");
     const [selectedGame, setSelectedGame] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
     const [selectedGenre, setSelectedGenre] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])("All");
+    const [sortBy, setSortBy] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])("A-Z");
     const genres = [
         "All",
         ...new Set(games.map((game)=>game.genre))
     ];
-    const filteredGames = games.filter((game)=>{
+    let filteredGames = games.filter((game)=>{
         const matchesSearch = game.title.toLowerCase().includes(search.toLowerCase());
         const matchesGenre = selectedGenre === "All" || game.genre === selectedGenre;
         return matchesSearch && matchesGenre;
     });
+    filteredGames.sort((a, b)=>{
+        if (sortBy === "A-Z") return a.title.localeCompare(b.title);
+        if (sortBy === "Top Rated") return (b.rating || 0) - (a.rating || 0);
+        if (sortBy === "Newest") return (b.year || 0) - (a.year || 0);
+        return 0;
+    });
+    // ==========================================
+    // NEW: ANIMATION INSTRUCTIONS
+    // ==========================================
+    const gridContainer = {
+        hidden: {
+            opacity: 0
+        },
+        show: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.05
+            }
+        }
+    };
+    const cardItem = {
+        hidden: {
+            opacity: 0,
+            y: 20
+        },
+        show: {
+            opacity: 1,
+            y: 0,
+            transition: {
+                duration: 0.3
+            }
+        }
+    };
+    // ==========================================
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -229,83 +266,131 @@ function SearchableGameGrid({ games }) {
                         children: genre
                     }, genre, false, {
                         fileName: "[project]/app/components/SearchableGameGrid.tsx",
-                        lineNumber: 37,
+                        lineNumber: 63,
                         columnNumber: 11
                     }, this))
             }, void 0, false, {
                 fileName: "[project]/app/components/SearchableGameGrid.tsx",
-                lineNumber: 35,
+                lineNumber: 61,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                className: "relative mb-6",
+                className: "flex flex-col md:flex-row gap-4 mb-6",
                 children: [
-                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
-                        type: "text",
-                        placeholder: "Search your library...",
-                        value: search,
-                        onChange: (e)=>setSearch(e.target.value),
-                        className: "\r\n\n            w-full\r\n\n            px-5\r\n\n            py-3\r\n\n            rounded-xl\r\n\n            bg-zinc-900/60\r\n\n            backdrop-blur-xl\r\n\n            border\r\n\n            border-zinc-800\r\n\n            focus:border-cyan-400/50\r\n\n            focus:shadow-[0_0_20px_rgba(22,188,249,0.15)]\r\n\n            outline-none\r\n\n            text-white\r\n\n            transition-all\r\n\n            duration-300\r\n\n          "
-                    }, void 0, false, {
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "relative flex-1",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
+                                type: "text",
+                                placeholder: "Search your library...",
+                                value: search,
+                                onChange: (e)=>setSearch(e.target.value),
+                                className: "w-full px-5 py-3 rounded-xl bg-zinc-900/60 backdrop-blur-xl border border-zinc-800 focus:border-cyan-400/50 focus:shadow-[0_0_20px_rgba(22,188,249,0.15)] outline-none text-white transition-all duration-300"
+                            }, void 0, false, {
+                                fileName: "[project]/app/components/SearchableGameGrid.tsx",
+                                lineNumber: 79,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                className: "absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500",
+                                children: "🔍"
+                            }, void 0, false, {
+                                fileName: "[project]/app/components/SearchableGameGrid.tsx",
+                                lineNumber: 86,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
                         fileName: "[project]/app/components/SearchableGameGrid.tsx",
-                        lineNumber: 53,
+                        lineNumber: 78,
                         columnNumber: 9
                     }, this),
-                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                        className: "absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500",
-                        children: "🔍"
-                    }, void 0, false, {
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
+                        value: sortBy,
+                        onChange: (e)=>setSortBy(e.target.value),
+                        className: "px-5 py-3 rounded-xl bg-zinc-900/60 backdrop-blur-xl border border-zinc-800 focus:border-cyan-400/50 focus:shadow-[0_0_20px_rgba(22,188,249,0.15)] outline-none text-white transition-all duration-300 cursor-pointer",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                value: "A-Z",
+                                children: "Alphabetical (A-Z)"
+                            }, void 0, false, {
+                                fileName: "[project]/app/components/SearchableGameGrid.tsx",
+                                lineNumber: 96,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                value: "Top Rated",
+                                children: "Top Rated"
+                            }, void 0, false, {
+                                fileName: "[project]/app/components/SearchableGameGrid.tsx",
+                                lineNumber: 97,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                value: "Newest",
+                                children: "Newest Release"
+                            }, void 0, false, {
+                                fileName: "[project]/app/components/SearchableGameGrid.tsx",
+                                lineNumber: 98,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
                         fileName: "[project]/app/components/SearchableGameGrid.tsx",
-                        lineNumber: 76,
+                        lineNumber: 91,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/components/SearchableGameGrid.tsx",
-                lineNumber: 52,
+                lineNumber: 77,
                 columnNumber: 7
             }, this),
-            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$render$2f$components$2f$motion$2f$proxy$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["motion"].div, {
+                variants: gridContainer,
+                initial: "hidden",
+                animate: "show",
                 className: "grid grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-4",
                 children: filteredGames.map((game)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$render$2f$components$2f$motion$2f$proxy$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["motion"].div, {
-                        initial: {
-                            opacity: 0
-                        },
-                        animate: {
-                            opacity: 1
-                        },
+                        variants: cardItem,
                         whileHover: {
                             y: -6,
                             scale: 1.03
                         },
-                        transition: {
-                            duration: 0.2
-                        },
                         onClick: ()=>setSelectedGame(game),
                         className: "group cursor-pointer",
                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "\r\n\n                relative\r\n\n                overflow-hidden\r\n\n                rounded-xl\r\n\n                border\r\n\n                border-zinc-800\r\n\n                bg-zinc-900/40\r\n\n                backdrop-blur-xl\r\n\n                hover:border-cyan-400/40\r\n\n                hover:shadow-[0_0_25px_rgba(22,188,249,0.20)]\r\n\n                transition-all\r\n\n                duration-300\r\n\n              ",
+                            className: "relative overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/40 backdrop-blur-xl hover:border-cyan-400/40 hover:shadow-[0_0_25px_rgba(22,188,249,0.20)] transition-all duration-300",
                             children: [
-                                game.cover ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$render$2f$components$2f$motion$2f$proxy$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["motion"].img, {
-                                    src: game.cover,
-                                    alt: game.title,
-                                    className: "w-full aspect-[2/3] object-cover",
+                                game.cover ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$render$2f$components$2f$motion$2f$proxy$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["motion"].div, {
+                                    className: "relative w-full aspect-[2/3]",
                                     whileHover: {
                                         scale: 1.08
                                     },
                                     transition: {
                                         duration: 0.3
-                                    }
+                                    },
+                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$image$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                                        src: game.cover,
+                                        alt: game.title,
+                                        fill: true,
+                                        className: "object-cover",
+                                        sizes: "(max-width: 768px) 33vw, 20vw"
+                                    }, void 0, false, {
+                                        fileName: "[project]/app/components/SearchableGameGrid.tsx",
+                                        lineNumber: 126,
+                                        columnNumber: 19
+                                    }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/app/components/SearchableGameGrid.tsx",
-                                    lineNumber: 114,
+                                    lineNumber: 121,
                                     columnNumber: 17
                                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                     className: "w-full aspect-[2/3] bg-zinc-800 flex items-center justify-center",
                                     children: "No Cover"
                                 }, void 0, false, {
                                     fileName: "[project]/app/components/SearchableGameGrid.tsx",
-                                    lineNumber: 122,
+                                    lineNumber: 135,
                                     columnNumber: 17
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -315,28 +400,28 @@ function SearchableGameGrid({ games }) {
                                         children: game.title
                                     }, void 0, false, {
                                         fileName: "[project]/app/components/SearchableGameGrid.tsx",
-                                        lineNumber: 128,
+                                        lineNumber: 140,
                                         columnNumber: 17
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/app/components/SearchableGameGrid.tsx",
-                                    lineNumber: 127,
+                                    lineNumber: 139,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/app/components/SearchableGameGrid.tsx",
-                            lineNumber: 98,
+                            lineNumber: 119,
                             columnNumber: 13
                         }, this)
                     }, game.title, false, {
                         fileName: "[project]/app/components/SearchableGameGrid.tsx",
-                        lineNumber: 84,
+                        lineNumber: 112,
                         columnNumber: 11
                     }, this))
-            }, void 0, false, {
+            }, sortBy + search + selectedGenre, false, {
                 fileName: "[project]/app/components/SearchableGameGrid.tsx",
-                lineNumber: 82,
+                lineNumber: 103,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$components$2f$AnimatePresence$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AnimatePresence"], {
@@ -353,7 +438,7 @@ function SearchableGameGrid({ games }) {
                         opacity: 0
                     },
                     children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$render$2f$components$2f$motion$2f$proxy$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["motion"].div, {
-                        className: "\r\n\n                bg-zinc-900/95\r\n\n                border\r\n\n                border-zinc-800\r\n\n                p-6\r\n\n                rounded-3xl\r\n\n                max-w-3xl\r\n\n                w-full\r\n\n                max-h-[90vh]\r\n\n                overflow-y-auto\r\n\n                shadow-2xl\r\n\n              ",
+                        className: "bg-zinc-900/95 border border-zinc-800 p-6 rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl",
                         onClick: (e)=>e.stopPropagation(),
                         initial: {
                             scale: 0.85,
@@ -377,14 +462,23 @@ function SearchableGameGrid({ games }) {
                                 lineNumber: 165,
                                 columnNumber: 15
                             }, this),
-                            selectedGame.cover && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("img", {
-                                src: selectedGame.cover,
-                                alt: selectedGame.title,
-                                className: "w-52 mx-auto rounded-2xl border border-zinc-800 mb-6"
+                            selectedGame.cover && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "relative w-52 h-[300px] mx-auto mb-6",
+                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$image$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                                    src: selectedGame.cover,
+                                    alt: selectedGame.title,
+                                    fill: true,
+                                    className: "object-cover rounded-2xl border border-zinc-800",
+                                    sizes: "208px"
+                                }, void 0, false, {
+                                    fileName: "[project]/app/components/SearchableGameGrid.tsx",
+                                    lineNumber: 174,
+                                    columnNumber: 19
+                                }, this)
                             }, void 0, false, {
                                 fileName: "[project]/app/components/SearchableGameGrid.tsx",
                                 lineNumber: 173,
-                                columnNumber: 3
+                                columnNumber: 17
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "text-center mb-6",
@@ -394,8 +488,8 @@ function SearchableGameGrid({ games }) {
                                         children: selectedGame.title
                                     }, void 0, false, {
                                         fileName: "[project]/app/components/SearchableGameGrid.tsx",
-                                        lineNumber: 181,
-                                        columnNumber: 3
+                                        lineNumber: 185,
+                                        columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: "flex justify-center flex-wrap gap-2",
@@ -406,35 +500,35 @@ function SearchableGameGrid({ games }) {
                                             }, void 0, false, {
                                                 fileName: "[project]/app/components/SearchableGameGrid.tsx",
                                                 lineNumber: 187,
-                                                columnNumber: 5
+                                                columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                 className: "px-3 py-1 rounded-full bg-zinc-800 text-zinc-300 text-sm",
                                                 children: "PC"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/components/SearchableGameGrid.tsx",
-                                                lineNumber: 191,
-                                                columnNumber: 5
+                                                lineNumber: 190,
+                                                columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                 className: "px-3 py-1 rounded-full bg-zinc-800 text-yellow-400 text-sm",
-                                                children: "★★★★★"
+                                                children: "★".repeat(selectedGame.rating || 5)
                                             }, void 0, false, {
                                                 fileName: "[project]/app/components/SearchableGameGrid.tsx",
-                                                lineNumber: 195,
-                                                columnNumber: 5
+                                                lineNumber: 191,
+                                                columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/components/SearchableGameGrid.tsx",
-                                        lineNumber: 185,
-                                        columnNumber: 3
+                                        lineNumber: 186,
+                                        columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/components/SearchableGameGrid.tsx",
-                                lineNumber: 180,
-                                columnNumber: 1
+                                lineNumber: 184,
+                                columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "grid grid-cols-2 gap-4 mb-6",
@@ -447,53 +541,53 @@ function SearchableGameGrid({ games }) {
                                                 children: "Status"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/components/SearchableGameGrid.tsx",
-                                                lineNumber: 205,
-                                                columnNumber: 5
+                                                lineNumber: 199,
+                                                columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                 className: "font-semibold text-white",
                                                 children: "Completed"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/components/SearchableGameGrid.tsx",
-                                                lineNumber: 209,
-                                                columnNumber: 5
+                                                lineNumber: 200,
+                                                columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/components/SearchableGameGrid.tsx",
-                                        lineNumber: 204,
-                                        columnNumber: 3
+                                        lineNumber: 198,
+                                        columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: "bg-zinc-800/40 border border-zinc-800 rounded-xl p-4",
                                         children: [
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                 className: "text-zinc-500 text-xs uppercase tracking-wider mb-1",
-                                                children: "Platform"
+                                                children: "Release Year"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/components/SearchableGameGrid.tsx",
-                                                lineNumber: 215,
-                                                columnNumber: 5
+                                                lineNumber: 203,
+                                                columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                 className: "font-semibold text-white",
-                                                children: "PC"
+                                                children: selectedGame.year
                                             }, void 0, false, {
                                                 fileName: "[project]/app/components/SearchableGameGrid.tsx",
-                                                lineNumber: 219,
-                                                columnNumber: 5
+                                                lineNumber: 204,
+                                                columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/components/SearchableGameGrid.tsx",
-                                        lineNumber: 214,
-                                        columnNumber: 3
+                                        lineNumber: 202,
+                                        columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/components/SearchableGameGrid.tsx",
-                                lineNumber: 202,
-                                columnNumber: 1
+                                lineNumber: 197,
+                                columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "border-t border-zinc-800 pt-6",
@@ -503,47 +597,47 @@ function SearchableGameGrid({ games }) {
                                         children: "About"
                                     }, void 0, false, {
                                         fileName: "[project]/app/components/SearchableGameGrid.tsx",
-                                        lineNumber: 228,
-                                        columnNumber: 3
+                                        lineNumber: 209,
+                                        columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                         className: "leading-8 text-zinc-300",
                                         children: selectedGame.summary || "No description available."
                                     }, void 0, false, {
                                         fileName: "[project]/app/components/SearchableGameGrid.tsx",
-                                        lineNumber: 232,
-                                        columnNumber: 3
+                                        lineNumber: 210,
+                                        columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/components/SearchableGameGrid.tsx",
-                                lineNumber: 226,
-                                columnNumber: 1
+                                lineNumber: 208,
+                                columnNumber: 15
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/components/SearchableGameGrid.tsx",
-                        lineNumber: 147,
+                        lineNumber: 158,
                         columnNumber: 13
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/app/components/SearchableGameGrid.tsx",
-                    lineNumber: 140,
+                    lineNumber: 151,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/app/components/SearchableGameGrid.tsx",
-                lineNumber: 138,
+                lineNumber: 149,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/app/components/SearchableGameGrid.tsx",
-        lineNumber: 33,
+        lineNumber: 60,
         columnNumber: 5
     }, this);
 }
-_s(SearchableGameGrid, "8F7fUQobf4hZCI8n7Qfemnysrhg=");
+_s(SearchableGameGrid, "cB816xcG9GabyAzVX/D7kLLLDEY=");
 _c = SearchableGameGrid;
 var _c;
 __turbopack_context__.k.register(_c, "SearchableGameGrid");
