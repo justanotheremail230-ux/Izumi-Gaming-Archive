@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import { Chess } from "chess.js";
 import { Chessboard } from "react-chessboard";
@@ -56,8 +56,8 @@ export default function ArcadePage() {
 // TIC-TAC-TOE WITH PVP & VS AI MODES
 // ==========================================
 function TicTacToeGame() {
-  const [board, setBoard] = useState(Array(9).fill(null));
-  const [isXNext, setIsXNext] = useState(true);
+  const [board, setBoard] = useState<Array<string | null>>(Array(9).fill(null));
+  const [isXNext, setIsXNext] = useState<boolean>(true);
   const [gameMode, setGameMode] = useState<"pvp" | "ai">("ai");
 
   const calculateWinner = (squares: Array<string | null>) => {
@@ -78,11 +78,30 @@ function TicTacToeGame() {
   const winner = calculateWinner(board);
   const isDraw = !winner && board.every((square) => square !== null);
 
+  useEffect(() => {
+    if (gameMode === "ai" && !isXNext && !winner && !isDraw) {
+      const timer = setTimeout(() => {
+        const emptyIndices = board
+          .map((val, idx) => (val === null ? idx : null))
+          .filter((val) => val !== null) as number[];
+
+        if (emptyIndices.length > 0) {
+          const randomIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+          const newBoard = [...board];
+          newBoard[randomIndex] = "O";
+          setBoard(newBoard);
+          setIsXNext(true);
+        }
+      }, 400);
+      return () => clearTimeout(timer);
+    }
+  }, [isXNext, board, winner, isDraw, gameMode]);
+
   const handleClick = (index: number) => {
-    if (board[index] || winner) return;
+    if (board[index] || winner || isDraw) return;
     if (gameMode === "ai" && !isXNext) return;
 
-    const newBoard = board.slice();
+    const newBoard = [...board];
     newBoard[index] = isXNext ? "X" : "O";
     setBoard(newBoard);
     setIsXNext(!isXNext);
@@ -160,50 +179,58 @@ function FullChessGame() {
   const [game, setGame] = useState(new Chess());
   const [status, setStatus] = useState("Your turn! Play as White.");
 
-  function makeAMove(move: { from: string; to: string; promotion?: string }) {
-    try {
-      // Create a fresh instance based on current FEN to properly validate and execute moves
-      const gameCopy = new Chess(game.fen());
-      const result = gameCopy.move(move);
-      if (result) {
-        setGame(gameCopy);
-        return result;
-      }
-    } catch (e) {
-      return null;
-    }
-    return null;
-  }
-
-  function makeRandomMove() {
-    const possibleMoves = game.moves({ verbose: true });
-    if (game.isGameOver() || game.isDraw() || possibleMoves.length === 0) {
-      setStatus("Game Over!");
-      return;
-    }
-    const randomIndex = Math.floor(Math.random() * possibleMoves.length);
-    const randomMove = possibleMoves[randomIndex];
-    
-    makeAMove({
-      from: randomMove.from,
-      to: randomMove.to,
-      promotion: "q",
-    });
-    setStatus("Your turn! Play as White.");
-  }
-
   function onDrop(sourceSquare: any, targetSquare: any) {
-    const move = makeAMove({
-      from: sourceSquare,
-      to: targetSquare,
-      promotion: "q",
-    });
+    if (game.isGameOver()) return false;
 
-    if (move === null) return false;
+    try {
+      const gameCopy = new Chess(game.fen());
+      
+      // Check if it's a pawn promotion move
+      const piece = gameCopy.get(sourceSquare);
+      const isPromotion =
+        piece &&
+        piece.type === "p" &&
+        ((piece.color === "w" && targetSquare[1] === "8") ||
+         (piece.color === "b" && targetSquare[1] === "1"));
 
-    setStatus("AI Bot is thinking...");
-    setTimeout(makeRandomMove, 300);
-    return true;
+      const move = gameCopy.move({
+        from: sourceSquare,
+        to: targetSquare,
+        promotion: isPromotion ? "q" : undefined,
+      });
+
+      if (move === null) return false;
+
+      setGame(gameCopy);
+
+      if (gameCopy.isGameOver() || gameCopy.isDraw()) {
+        setStatus("Game Over!");
+        return true;
+      }
+
+      setStatus("AI Bot is thinking...");
+
+      setTimeout(() => {
+        const possibleMoves = gameCopy.moves({ verbose: true });
+        if (possibleMoves.length > 0) {
+          const randomIndex = Math.floor(Math.random() * possibleMoves.length);
+          const aiMove = possibleMoves[randomIndex];
+          
+          gameCopy.move(aiMove);
+          setGame(new Chess(gameCopy.fen()));
+
+          if (gameCopy.isGameOver() || gameCopy.isDraw()) {
+            setStatus("Game Over!");
+          } else {
+            setStatus("Your turn! Play as White.");
+          }
+        }
+      }, 300);
+
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   return (
