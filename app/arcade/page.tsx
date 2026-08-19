@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 
 export default function ArcadePage() {
-  const [selectedGame, setSelectedGame] = useState<"tictactoe" | "rps">("tictactoe");
+  const [selectedGame, setSelectedGame] = useState<"tictactoe" | "rps" | "memory">("tictactoe");
 
   return (
     <main className="min-h-screen bg-black text-white">
@@ -18,7 +18,7 @@ export default function ArcadePage() {
         </div>
 
         {/* Game Switcher Tabs */}
-        <div className="flex justify-center gap-4 mb-10">
+        <div className="flex flex-wrap justify-center gap-3 mb-10">
           <button
             onClick={() => setSelectedGame("tictactoe")}
             className={`px-6 py-2.5 rounded-xl font-medium transition-all duration-300 ${
@@ -39,11 +39,27 @@ export default function ArcadePage() {
           >
             Rock, Paper, Scissors
           </button>
+          <button
+            onClick={() => setSelectedGame("memory")}
+            className={`px-6 py-2.5 rounded-xl font-medium transition-all duration-300 ${
+              selectedGame === "memory"
+                ? "bg-cyan-500 text-black font-bold shadow-lg shadow-cyan-500/20"
+                : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-white border border-zinc-800"
+            }`}
+          >
+            Memory Match
+          </button>
         </div>
 
         {/* Game Container Area */}
         <div className="bg-zinc-900/60 backdrop-blur-xl border border-zinc-800/80 rounded-3xl p-8 shadow-2xl min-h-[480px] flex flex-col items-center justify-center">
-          {selectedGame === "tictactoe" ? <TicTacToeGame /> : <RockPaperScissorsGame />}
+          {selectedGame === "tictactoe" ? (
+            <TicTacToeGame />
+          ) : selectedGame === "rps" ? (
+            <RockPaperScissorsGame />
+          ) : (
+            <MemoryGame />
+          )}
         </div>
       </section>
     </main>
@@ -51,7 +67,7 @@ export default function ArcadePage() {
 }
 
 // ==========================================
-// TIC-TAC-TOE WITH PVP & VS AI MODES
+// 1. TIC-TAC-TOE WITH PVP & VS AI MODES
 // ==========================================
 function TicTacToeGame() {
   const [board, setBoard] = useState<Array<string | null>>(Array(9).fill(null));
@@ -171,7 +187,7 @@ function TicTacToeGame() {
 }
 
 // ==========================================
-// ROCK, PAPER, SCISSORS VS AI MODULE
+// 2. ROCK, PAPER, SCISSORS VS AI MODULE
 // ==========================================
 type Choice = "rock" | "paper" | "scissors";
 
@@ -227,7 +243,6 @@ function RockPaperScissorsGame() {
         <p className="text-zinc-400 mt-1">{result}</p>
       </div>
 
-      {/* Scoreboard */}
       <div className="flex gap-6 mb-8 bg-zinc-950 px-6 py-3 rounded-2xl border border-zinc-800 text-sm">
         <div className="text-center">
           <p className="text-zinc-500">Wins</p>
@@ -243,7 +258,6 @@ function RockPaperScissorsGame() {
         </div>
       </div>
 
-      {/* Arena Display */}
       <div className="flex justify-around items-center w-full mb-8 bg-zinc-950/60 p-6 rounded-2xl border border-zinc-800">
         <div className="text-center">
           <p className="text-xs text-zinc-400 mb-2 font-medium">You</p>
@@ -260,7 +274,6 @@ function RockPaperScissorsGame() {
         </div>
       </div>
 
-      {/* Selection Buttons */}
       <div className="flex gap-4 w-full justify-center mb-6">
         {choices.map((item) => (
           <button
@@ -279,6 +292,113 @@ function RockPaperScissorsGame() {
         className="px-6 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium rounded-xl transition-all border border-zinc-700 text-sm"
       >
         Reset Scores
+      </button>
+    </div>
+  );
+}
+
+// ==========================================
+// 3. MEMORY MATCH CARD FLIP GAME MODULE
+// ==========================================
+const cardIcons = ["🎮", "🕹️", "⚡", "🔥", "🚀", "🎯"];
+
+interface CardItem {
+  id: number;
+  icon: string;
+  isFlipped: boolean;
+  isMatched: boolean;
+}
+
+function MemoryGame() {
+  const [cards, setCards] = useState<CardItem[]>([]);
+  const [firstSelection, setFirstSelection] = useState<number | null>(null);
+  const [isChecking, setIsChecking] = useState(false);
+  const [matches, setMatches] = useState(0);
+
+  const initializeGame = () => {
+    const deck = [...cardIcons, ...cardIcons]
+      .sort(() => Math.random() - 0.5)
+      .map((icon, index) => ({
+        id: index,
+        icon,
+        isFlipped: false,
+        isMatched: false,
+      }));
+    setCards(deck);
+    setFirstSelection(null);
+    setMatches(0);
+    setIsChecking(false);
+  };
+
+  useEffect(() => {
+    initializeGame();
+  }, []);
+
+  const handleCardClick = (index: number) => {
+    if (isChecking || cards[index].isFlipped || cards[index].isMatched) return;
+
+    const newCards = [...cards];
+    newCards[index].isFlipped = true;
+    setCards(newCards);
+
+    if (firstSelection === null) {
+      setFirstSelection(index);
+    } else {
+      setIsChecking(true);
+      const firstCard = cards[firstSelection];
+      const secondCard = newCards[index];
+
+      if (firstCard.icon === secondCard.icon) {
+        newCards[firstSelection].isMatched = true;
+        newCards[index].isMatched = true;
+        setCards(newCards);
+        setFirstSelection(null);
+        setIsChecking(false);
+        setMatches((prev) => prev + 1);
+      } else {
+        setTimeout(() => {
+          newCards[firstSelection].isFlipped = false;
+          newCards[index].isFlipped = false;
+          setCards(newCards);
+          setFirstSelection(null);
+          setIsChecking(false);
+        }, 800);
+      }
+    }
+  };
+
+  const isComplete = matches === cardIcons.length;
+
+  return (
+    <div className="flex flex-col items-center w-full max-w-md">
+      <div className="text-center mb-6">
+        <h3 className="text-xl font-bold text-cyan-400">Memory Match</h3>
+        <p className="text-zinc-400 mt-1">
+          {isComplete ? "You matched all pairs! 🎉" : `Pairs Found: ${matches} / ${cardIcons.length}`}
+        </p>
+      </div>
+
+      <div className="grid grid-cols-4 gap-3 w-full mb-6">
+        {cards.map((card, index) => (
+          <button
+            key={card.id}
+            onClick={() => handleCardClick(index)}
+            className={`h-16 rounded-xl text-2xl flex items-center justify-center border transition-all duration-300 ${
+              card.isFlipped || card.isMatched
+                ? "bg-cyan-500/10 border-cyan-500/50 text-white"
+                : "bg-zinc-950 border-zinc-800 hover:border-zinc-700 text-transparent"
+            }`}
+          >
+            {card.isFlipped || card.isMatched ? card.icon : "❓"}
+          </button>
+        ))}
+      </div>
+
+      <button
+        onClick={initializeGame}
+        className="px-6 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium rounded-xl transition-all border border-zinc-700 text-sm"
+      >
+        Restart Game
       </button>
     </div>
   );
