@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
   const links = [
     { name: "Home", href: "#home", icon: "🏠" },
@@ -11,7 +13,7 @@ export default function Navbar() {
     { name: "Favorites", href: "#favorites", icon: "⭐" },
     { name: "Wishlist", href: "#wishlist", icon: "📝" },
     { name: "Library", href: "#game-library", icon: "📚" },
-    { name: "Arcade", href: "/arcade", icon: "🕹️" }, // Added Arcade Link
+    { name: "Arcade", href: "/arcade", icon: "🕹️" },
   ];
 
   return (
@@ -20,8 +22,6 @@ export default function Navbar() {
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
     >
-      {/* Parent container handles the hover events */}
-      
       {/* Floating Button (Visible when menu is closed) */}
       <div 
         className={`transition-all duration-300 ease-in-out ${
@@ -57,32 +57,36 @@ export default function Navbar() {
 
         {/* MENU LINKS */}
         <div className="py-2">
-          {links.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              onClick={() => setOpen(false)}
-              className="
-                flex
-                items-center
-                justify-start
-                gap-4
-                px-6
-                py-3.5
-                text-zinc-300
-                hover:text-cyan-300
-                hover:bg-cyan-500/10
-                transition-all
-                duration-200
-              "
-            >
-              <span className="text-xl">{link.icon}</span>
-              <span className="font-medium">{link.name}</span>
-            </a>
-          ))}
+          {links.map((link) => {
+            const isHash = link.href.startsWith("#");
+            const targetHref = isHash && pathname !== "/" ? "/" + link.href : link.href;
+
+            return (
+              <a
+                key={link.href}
+                href={targetHref}
+                onClick={() => setOpen(false)}
+                className="
+                  flex
+                  items-center
+                  justify-start
+                  gap-4
+                  px-6
+                  py-3.5
+                  text-zinc-300
+                  hover:text-cyan-300
+                  hover:bg-cyan-500/10
+                  transition-all
+                  duration-200
+                "
+              >
+                <span className="text-xl">{link.icon}</span>
+                <span className="font-medium">{link.name}</span>
+              </a>
+            );
+          })}
         </div>
       </div>
-      
     </div>
   );
 }
