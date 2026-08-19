@@ -1,59 +1,43 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*<>/\\";
+interface DecryptTitleProps {
+  text: string;
+  className?: string;
+}
 
-export default function DecryptTitle() {
-  const targetText = "IZUMI";
-  const [displayText, setDisplayText] = useState("#####");
-  const [hasStarted, setHasStarted] = useState(false);
+const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%*&";
 
-  useEffect(() => {
-    // Wait for the intro loader to finish (1.5 seconds) before starting the effect
-    const startTimer = setTimeout(() => {
-      setHasStarted(true);
-    }, 1500);
+export default function DecryptTitle({ text, className = "" }: DecryptTitleProps) {
+  const [displayText, setDisplayText] = useState(text);
 
-    return () => clearTimeout(startTimer);
-  }, []);
-
-  useEffect(() => {
-    if (!hasStarted) return;
-
+  const scramble = () => {
     let iteration = 0;
-    
     const interval = setInterval(() => {
       setDisplayText(
-        targetText
+        text
           .split("")
-          .map((letter, index) => {
+          .map((char, index) => {
+            if (char === " ") return " ";
             if (index < iteration) {
-              return targetText[index];
+              return text[index];
             }
-            return characters[Math.floor(Math.random() * characters.length)];
+            return letters[Math.floor(Math.random() * letters.length)];
           })
           .join("")
       );
 
-      if (iteration >= targetText.length) {
+      if (iteration >= text.length) {
         clearInterval(interval);
       }
-
-      iteration += 1 / 2;
-    }, 80);
-
-    return () => clearInterval(interval);
-  }, [hasStarted]);
+      iteration += 1 / 3;
+    }, 30);
+  };
 
   return (
-    <h1
-      className="text-7xl md:text-9xl font-black text-white tracking-widest font-mono"
-      style={{
-        textShadow: "0 0 25px rgba(22,188,249,0.5), 0 0 50px rgba(255,255,255,0.2)",
-      }}
-    >
+    <span onMouseEnter={scramble} className={`cursor-default ${className}`}>
       {displayText}
-    </h1>
+    </span>
   );
 }
