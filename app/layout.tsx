@@ -5,6 +5,7 @@ import CursorGlow from "./components/CursorGlow";
 import IntroLoader from "./components/IntroLoader";
 import ScrollProgress from "./components/ScrollProgress";
 import Particles from "./components/Particles";
+import VirtualPet from "./components/VirtualPet";
 
 const exo = Exo_2({
   subsets: ["latin"],
@@ -40,6 +41,9 @@ export default function RootLayout({
         <div className="relative z-10">
           {children}
         </div>
+
+        {/* Interactive Virtual Pet Companion */}
+        <VirtualPet />
       </body>
     </html>
   );
