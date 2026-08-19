@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 
 export default function ArcadePage() {
-  const [selectedGame, setSelectedGame] = useState<"tictactoe" | "rps" | "memory">("tictactoe");
+  const [selectedGame, setSelectedGame] = useState<"tictactoe" | "rps" | "memory" | "guess" | "reaction">("tictactoe");
 
   return (
     <main className="min-h-screen bg-black text-white">
@@ -18,10 +18,10 @@ export default function ArcadePage() {
         </div>
 
         {/* Game Switcher Tabs */}
-        <div className="flex flex-wrap justify-center gap-3 mb-10">
+        <div className="flex flex-wrap justify-center gap-2.5 mb-10">
           <button
             onClick={() => setSelectedGame("tictactoe")}
-            className={`px-6 py-2.5 rounded-xl font-medium transition-all duration-300 ${
+            className={`px-5 py-2.5 rounded-xl font-medium text-sm transition-all duration-300 ${
               selectedGame === "tictactoe"
                 ? "bg-cyan-500 text-black font-bold shadow-lg shadow-cyan-500/20"
                 : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-white border border-zinc-800"
@@ -31,7 +31,7 @@ export default function ArcadePage() {
           </button>
           <button
             onClick={() => setSelectedGame("rps")}
-            className={`px-6 py-2.5 rounded-xl font-medium transition-all duration-300 ${
+            className={`px-5 py-2.5 rounded-xl font-medium text-sm transition-all duration-300 ${
               selectedGame === "rps"
                 ? "bg-cyan-500 text-black font-bold shadow-lg shadow-cyan-500/20"
                 : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-white border border-zinc-800"
@@ -41,13 +41,33 @@ export default function ArcadePage() {
           </button>
           <button
             onClick={() => setSelectedGame("memory")}
-            className={`px-6 py-2.5 rounded-xl font-medium transition-all duration-300 ${
+            className={`px-5 py-2.5 rounded-xl font-medium text-sm transition-all duration-300 ${
               selectedGame === "memory"
                 ? "bg-cyan-500 text-black font-bold shadow-lg shadow-cyan-500/20"
                 : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-white border border-zinc-800"
             }`}
           >
             Memory Match
+          </button>
+          <button
+            onClick={() => setSelectedGame("guess")}
+            className={`px-5 py-2.5 rounded-xl font-medium text-sm transition-all duration-300 ${
+              selectedGame === "guess"
+                ? "bg-cyan-500 text-black font-bold shadow-lg shadow-cyan-500/20"
+                : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-white border border-zinc-800"
+            }`}
+          >
+            Number Guess
+          </button>
+          <button
+            onClick={() => setSelectedGame("reaction")}
+            className={`px-5 py-2.5 rounded-xl font-medium text-sm transition-all duration-300 ${
+              selectedGame === "reaction"
+                ? "bg-cyan-500 text-black font-bold shadow-lg shadow-cyan-500/20"
+                : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-white border border-zinc-800"
+            }`}
+          >
+            Reaction Timer
           </button>
         </div>
 
@@ -57,8 +77,12 @@ export default function ArcadePage() {
             <TicTacToeGame />
           ) : selectedGame === "rps" ? (
             <RockPaperScissorsGame />
-          ) : (
+          ) : selectedGame === "memory" ? (
             <MemoryGame />
+          ) : selectedGame === "guess" ? (
+            <NumberGuessGame />
+          ) : (
+            <ReactionGame />
           )}
         </div>
       </section>
@@ -400,6 +424,196 @@ function MemoryGame() {
       >
         Restart Game
       </button>
+    </div>
+  );
+}
+
+// ==========================================
+// 4. NUMBER GUESSING GAME (1 - 100)
+// ==========================================
+function NumberGuessGame() {
+  const [targetNum, setTargetNum] = useState<number>(() => Math.floor(Math.random() * 100) + 1);
+  const [guess, setGuess] = useState<string>("");
+  const [message, setMessage] = useState<string>("Guess a number between 1 and 100");
+  const [attempts, setAttempts] = useState<number>(0);
+  const [won, setWon] = useState<boolean>(false);
+
+  const handleGuess = (e: React.FormEvent) => {
+    e.preventDefault();
+    const num = parseInt(guess);
+    if (isNaN(num)) return;
+
+    const newAttempts = attempts + 1;
+    setAttempts(newAttempts);
+
+    if (num === targetNum) {
+      setMessage(`Correct! You found it in ${newAttempts} attempts! 🎉`);
+      setWon(true);
+    } else if (num < targetNum) {
+      setMessage("Too low! Try a higher number 📈");
+    } else {
+      setMessage("Too high! Try a lower number 📉");
+    }
+    setGuess("");
+  };
+
+  const resetGuess = () => {
+    setTargetNum(Math.floor(Math.random() * 100) + 1);
+    setGuess("");
+    setMessage("Guess a number between 1 and 100");
+    setAttempts(0);
+    setWon(false);
+  };
+
+  return (
+    <div className="flex flex-col items-center w-full max-w-md">
+      <div className="text-center mb-6">
+        <h3 className="text-xl font-bold text-cyan-400">Number Guessing</h3>
+        <p className="text-zinc-400 mt-1">{message}</p>
+      </div>
+
+      <div className="w-full bg-zinc-950/60 p-6 rounded-2xl border border-zinc-800 mb-6 text-center">
+        <p className="text-xs text-zinc-500 mb-3">Attempts: <span className="text-white font-bold">{attempts}</span></p>
+        
+        {!won ? (
+          <form onSubmit={handleGuess} className="flex gap-2">
+            <input
+              type="number"
+              min="1"
+              max="100"
+              value={guess}
+              onChange={(e) => setGuess(e.target.value)}
+              placeholder="Enter number..."
+              className="flex-1 bg-zinc-900 border border-zinc-800 px-4 py-2.5 rounded-xl text-white focus:outline-none focus:border-cyan-500 text-sm"
+              autoFocus
+            />
+            <button
+              type="submit"
+              className="px-5 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-xl text-sm transition-all shadow-lg shadow-cyan-500/20"
+            >
+              Guess
+            </button>
+          </form>
+        ) : (
+          <button
+            onClick={resetGuess}
+            className="w-full py-3 bg-green-500 hover:bg-green-400 text-black font-bold rounded-xl text-sm transition-all"
+          >
+            Play Again 🚀
+          </button>
+        )}
+      </div>
+
+      {!won && (
+        <button
+          onClick={resetGuess}
+          className="px-6 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium rounded-xl transition-all border border-zinc-700 text-sm"
+        >
+          Reset Game
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ==========================================
+// 5. REACTION TIME TESTER
+// ==========================================
+type ReactionState = "waiting" | "ready" | "clicked" | "result" | "early";
+
+function ReactionGame() {
+  const [gameState, setGameState] = useState<ReactionState>("waiting");
+  const [startTime, setStartTime] = useState<number>(0);
+  const [reactionTime, setReactionTime] = useState<number>(0);
+  const [timerId, setTimerId] = useState<NodeJS.Timeout | null>(null);
+
+  const startTest = () => {
+    setGameState("waiting");
+    const randomTime = Math.floor(Math.random() * 2000) + 1500; // 1.5 to 3.5 seconds
+
+    const id = setTimeout(() => {
+      setGameState("ready");
+      setStartTime(Date.now());
+    }, randomTime);
+
+    setTimerId(id);
+  };
+
+  const handleClick = () => {
+    if (gameState === "waiting") {
+      if (timerId) clearTimeout(timerId);
+      setGameState("early");
+    } else if (gameState === "ready") {
+      const elapsed = Date.now() - startTime;
+      setReactionTime(elapsed);
+      setGameState("result");
+    } else if (gameState === "result" || gameState === "early") {
+      startTest();
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center w-full max-w-md">
+      <div className="text-center mb-6">
+        <h3 className="text-xl font-bold text-cyan-400">Reaction Timer</h3>
+        <p className="text-zinc-400 mt-1">Test your reflexes!</p>
+      </div>
+
+      {/* Interactive Box */}
+      <div
+        onClick={handleClick}
+        className={`w-full h-56 rounded-2xl border flex flex-col items-center justify-center cursor-pointer transition-all p-6 text-center select-none shadow-xl ${
+          gameState === "waiting"
+            ? "bg-rose-950/40 border-rose-900/50 text-rose-300"
+            : gameState === "ready"
+            ? "bg-emerald-500 border-emerald-400 text-black font-black animate-pulse"
+            : gameState === "early"
+            ? "bg-amber-950/40 border-amber-900/50 text-amber-300"
+            : "bg-zinc-950 border-zinc-800 text-white"
+        }`}
+      >
+        {gameState === "waiting" && (
+          <>
+            <span className="text-3xl mb-2">⏳</span>
+            <p className="text-lg font-bold">Wait for Green...</p>
+            <p className="text-xs text-rose-400/80 mt-1">(Don't click too early!)</p>
+          </>
+        )}
+        {gameState === "ready" && (
+          <>
+            <span className="text-4xl mb-2">⚡</span>
+            <p className="text-3xl tracking-wide">CLICK NOW!</p>
+          </>
+        )}
+        {gameState === "early" && (
+          <>
+            <span className="text-3xl mb-2">❌</span>
+            <p className="text-lg font-bold">Too Soon!</p>
+            <p className="text-xs text-zinc-400 mt-2">Click anywhere to try again.</p>
+          </>
+        )}
+        {gameState === "result" && (
+          <>
+            <span className="text-3xl mb-2">🏆</span>
+            <p className="text-sm text-zinc-400">Your Reaction Time:</p>
+            <p className="text-3xl font-extrabold text-cyan-400 my-1">{reactionTime} ms</p>
+            <p className="text-xs text-zinc-500 mt-2">Click anywhere to play again.</p>
+          </>
+        )}
+        {/* Initial state trigger before first click */}
+      </div>
+
+      {gameState === "waiting" && timerId === null ? null : (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            startTest();
+          }}
+          className="mt-6 px-6 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium rounded-xl transition-all border border-zinc-700 text-sm"
+        >
+          {gameState === "result" || gameState === "early" ? "Play Again" : "Start Test"}
+        </button>
+      )}
     </div>
   );
 }
