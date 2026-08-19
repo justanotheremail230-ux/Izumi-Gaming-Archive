@@ -78,12 +78,13 @@ function TicTacToeGame() {
   const winner = calculateWinner(board);
   const isDraw = !winner && board.every((square) => square !== null);
 
+  // AI Turn Handling
   useEffect(() => {
     if (gameMode === "ai" && !isXNext && !winner && !isDraw) {
       const timer = setTimeout(() => {
         const emptyIndices = board
           .map((val, idx) => (val === null ? idx : null))
-          .filter((val) => val !== null) as number[];
+          .filter((val): val is number => val !== null);
 
         if (emptyIndices.length > 0) {
           const randomIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
@@ -118,7 +119,7 @@ function TicTacToeGame() {
         <button
           onClick={() => { setGameMode("ai"); resetGame(); }}
           className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-            gameMode === "ai" ? "bg-cyan-500 text-black" : "text-zinc-400 hover:text-white"
+            gameMode === "ai" ? "bg-cyan-500 text-black font-bold" : "text-zinc-400 hover:text-white"
           }`}
         >
           vs Bot (AI)
@@ -126,7 +127,7 @@ function TicTacToeGame() {
         <button
           onClick={() => { setGameMode("pvp"); resetGame(); }}
           className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-            gameMode === "pvp" ? "bg-cyan-500 text-black" : "text-zinc-400 hover:text-white"
+            gameMode === "pvp" ? "bg-cyan-500 text-black font-bold" : "text-zinc-400 hover:text-white"
           }`}
         >
           2 Player (Local)
@@ -137,7 +138,7 @@ function TicTacToeGame() {
         {winner ? (
           <span className="text-green-400">Winner: {winner === "X" ? "You" : gameMode === "ai" ? "AI Bot" : "Player O"} 🎉</span>
         ) : isDraw ? (
-          <span className="text-yellow-400">It's a Draw! 🤝</span>
+          <span className="text-yellow-400">It&apos;s a Draw! 🤝</span>
         ) : (
           <span className="text-zinc-300">
             Current Turn:{" "}
@@ -176,61 +177,79 @@ function TicTacToeGame() {
 // FULL CHESS GAME VS AI MODULE
 // ==========================================
 function FullChessGame() {
-  const [game, setGame] = useState(new Chess());
+  const [game, setGame] = useState(() => new Chess());
+  const [fen, setFen] = useState(() => game.fen());
   const [status, setStatus] = useState("Your turn! Play as White.");
+  const [mounted, setMounted] = useState(false);
 
-  function onDrop(sourceSquare: any, targetSquare: any) {
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  function makeAIMove() {
+    const possibleMoves = game.moves({ verbose: true });
+    if (game.isGameOver() || game.isDraw() || possibleMoves.length === 0) {
+      setStatus("Game Over!");
+      return;
+    }
+
+    const randomIndex = Math.floor(Math.random() * possibleMoves.length);
+    const aiMove = possibleMoves[randomIndex];
+
+    try {
+      game.move(aiMove);
+      setFen(game.fen());
+
+      if (game.isGameOver() || game.isDraw()) {
+        setStatus("Game Over!");
+      } else {
+        setStatus("Your turn! Play as White.");
+      }
+    } catch {
+      setStatus("Your turn! Play as White.");
+    }
+  }
+
+  function onPieceDrop(sourceSquare: any, targetSquare: any) {
     if (game.isGameOver()) return false;
 
     try {
-      const gameCopy = new Chess(game.fen());
-      
-      // Check if it's a pawn promotion move
-      const piece = gameCopy.get(sourceSquare);
-      const isPromotion =
-        piece &&
-        piece.type === "p" &&
-        ((piece.color === "w" && targetSquare[1] === "8") ||
-         (piece.color === "b" && targetSquare[1] === "1"));
-
-      const move = gameCopy.move({
+      const move = game.move({
         from: sourceSquare,
         to: targetSquare,
-        promotion: isPromotion ? "q" : undefined,
+        promotion: "q",
       });
 
       if (move === null) return false;
 
-      setGame(gameCopy);
+      setFen(game.fen());
 
-      if (gameCopy.isGameOver() || gameCopy.isDraw()) {
+      if (game.isGameOver() || game.isDraw()) {
         setStatus("Game Over!");
         return true;
       }
 
       setStatus("AI Bot is thinking...");
-
-      setTimeout(() => {
-        const possibleMoves = gameCopy.moves({ verbose: true });
-        if (possibleMoves.length > 0) {
-          const randomIndex = Math.floor(Math.random() * possibleMoves.length);
-          const aiMove = possibleMoves[randomIndex];
-          
-          gameCopy.move(aiMove);
-          setGame(new Chess(gameCopy.fen()));
-
-          if (gameCopy.isGameOver() || gameCopy.isDraw()) {
-            setStatus("Game Over!");
-          } else {
-            setStatus("Your turn! Play as White.");
-          }
-        }
-      }, 300);
-
+      setTimeout(makeAIMove, 350);
       return true;
-    } catch (e) {
+    } catch {
       return false;
     }
+  }
+
+  const resetGame = () => {
+    const newGame = new Chess();
+    setGame(newGame);
+    setFen(newGame.fen());
+    setStatus("Your turn! Play as White.");
+  };
+
+  if (!mounted) {
+    return (
+      <div className="flex items-center justify-center h-80 text-zinc-500">
+        Loading Chessboard...
+      </div>
+    );
   }
 
   return (
@@ -241,22 +260,19 @@ function FullChessGame() {
       </div>
 
       <div className="w-full bg-zinc-950 p-2 rounded-lg border border-zinc-800 shadow-xl">
-        <Chessboard 
+        <Chessboard
           {...({
-            position: game.fen(),
-            onPieceDrop: onDrop,
+            position: fen,
+            onPieceDrop: onPieceDrop,
             boardOrientation: "white",
-            customDarkSquareStyle: { backgroundColor: '#27272a' },
-            customLightSquareStyle: { backgroundColor: '#52525b' },
+            customDarkSquareStyle: { backgroundColor: "#27272a" },
+            customLightSquareStyle: { backgroundColor: "#52525b" },
           } as any)}
         />
       </div>
 
       <button
-        onClick={() => {
-          setGame(new Chess());
-          setStatus("Your turn! Play as White.");
-        }}
+        onClick={resetGame}
         className="mt-8 px-6 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium rounded-xl transition-all border border-zinc-700 text-sm"
       >
         Restart Chess Match
