@@ -2,11 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
-import { Chess } from "chess.js";
-import { Chessboard } from "react-chessboard";
 
 export default function ArcadePage() {
-  const [selectedGame, setSelectedGame] = useState<"tictactoe" | "chess">("tictactoe");
+  const [selectedGame, setSelectedGame] = useState<"tictactoe" | "rps">("tictactoe");
 
   return (
     <main className="min-h-screen bg-black text-white">
@@ -32,20 +30,20 @@ export default function ArcadePage() {
             Tic-Tac-Toe
           </button>
           <button
-            onClick={() => setSelectedGame("chess")}
+            onClick={() => setSelectedGame("rps")}
             className={`px-6 py-2.5 rounded-xl font-medium transition-all duration-300 ${
-              selectedGame === "chess"
+              selectedGame === "rps"
                 ? "bg-cyan-500 text-black font-bold shadow-lg shadow-cyan-500/20"
                 : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-white border border-zinc-800"
             }`}
           >
-            Play Chess (vs AI)
+            Rock, Paper, Scissors
           </button>
         </div>
 
         {/* Game Container Area */}
         <div className="bg-zinc-900/60 backdrop-blur-xl border border-zinc-800/80 rounded-3xl p-8 shadow-2xl min-h-[480px] flex flex-col items-center justify-center">
-          {selectedGame === "tictactoe" ? <TicTacToeGame /> : <FullChessGame />}
+          {selectedGame === "tictactoe" ? <TicTacToeGame /> : <RockPaperScissorsGame />}
         </div>
       </section>
     </main>
@@ -78,7 +76,6 @@ function TicTacToeGame() {
   const winner = calculateWinner(board);
   const isDraw = !winner && board.every((square) => square !== null);
 
-  // AI Turn Handling
   useEffect(() => {
     if (gameMode === "ai" && !isXNext && !winner && !isDraw) {
       const timer = setTimeout(() => {
@@ -174,108 +171,114 @@ function TicTacToeGame() {
 }
 
 // ==========================================
-// FULL CHESS GAME VS AI MODULE
+// ROCK, PAPER, SCISSORS VS AI MODULE
 // ==========================================
-function FullChessGame() {
-  const [game, setGame] = useState(() => new Chess());
-  const [fen, setFen] = useState(() => game.fen());
-  const [status, setStatus] = useState("Your turn! Play as White.");
-  const [mounted, setMounted] = useState(false);
+type Choice = "rock" | "paper" | "scissors";
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+const choices: { id: Choice; label: string; emoji: string }[] = [
+  { id: "rock", label: "Rock", emoji: "🪨" },
+  { id: "paper", label: "Paper", emoji: "📄" },
+  { id: "scissors", label: "Scissors", emoji: "✂️" },
+];
 
-  function makeAIMove() {
-    const possibleMoves = game.moves({ verbose: true });
-    if (game.isGameOver() || game.isDraw() || possibleMoves.length === 0) {
-      setStatus("Game Over!");
-      return;
+function RockPaperScissorsGame() {
+  const [playerChoice, setPlayerChoice] = useState<Choice | null>(null);
+  const [aiChoice, setAiChoice] = useState<Choice | null>(null);
+  const [result, setResult] = useState<string>("Make your move!");
+  const [score, setScore] = useState({ wins: 0, losses: 0, ties: 0 });
+
+  const handlePlay = (choice: Choice) => {
+    const aiRandomChoice = choices[Math.floor(Math.random() * choices.length)].id;
+    setPlayerChoice(choice);
+    setAiChoice(aiRandomChoice);
+
+    if (choice === aiRandomChoice) {
+      setResult("It's a Tie! 🤝");
+      setScore((prev) => ({ ...prev, ties: prev.ties + 1 }));
+    } else if (
+      (choice === "rock" && aiRandomChoice === "scissors") ||
+      (choice === "paper" && aiRandomChoice === "rock") ||
+      (choice === "scissors" && aiRandomChoice === "paper")
+    ) {
+      setResult("You Win! 🎉");
+      setScore((prev) => ({ ...prev, wins: prev.wins + 1 }));
+    } else {
+      setResult("AI Bot Wins! 🤖");
+      setScore((prev) => ({ ...prev, losses: prev.losses + 1 }));
     }
-
-    const randomIndex = Math.floor(Math.random() * possibleMoves.length);
-    const aiMove = possibleMoves[randomIndex];
-
-    try {
-      game.move(aiMove);
-      setFen(game.fen());
-
-      if (game.isGameOver() || game.isDraw()) {
-        setStatus("Game Over!");
-      } else {
-        setStatus("Your turn! Play as White.");
-      }
-    } catch {
-      setStatus("Your turn! Play as White.");
-    }
-  }
-
-  function onPieceDrop(sourceSquare: any, targetSquare: any) {
-    if (game.isGameOver()) return false;
-
-    try {
-      const move = game.move({
-        from: sourceSquare,
-        to: targetSquare,
-        promotion: "q",
-      });
-
-      if (move === null) return false;
-
-      setFen(game.fen());
-
-      if (game.isGameOver() || game.isDraw()) {
-        setStatus("Game Over!");
-        return true;
-      }
-
-      setStatus("AI Bot is thinking...");
-      setTimeout(makeAIMove, 350);
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  const resetGame = () => {
-    const newGame = new Chess();
-    setGame(newGame);
-    setFen(newGame.fen());
-    setStatus("Your turn! Play as White.");
   };
 
-  if (!mounted) {
-    return (
-      <div className="flex items-center justify-center h-80 text-zinc-500">
-        Loading Chessboard...
-      </div>
-    );
-  }
+  const resetRps = () => {
+    setPlayerChoice(null);
+    setAiChoice(null);
+    setResult("Make your move!");
+    setScore({ wins: 0, losses: 0, ties: 0 });
+  };
+
+  const getEmoji = (id: Choice | null) => {
+    const found = choices.find((c) => c.id === id);
+    return found ? found.emoji : "❓";
+  };
 
   return (
-    <div className="flex flex-col items-center w-full max-w-[400px]">
-      <div className="mb-6 text-center">
-        <h3 className="text-xl font-bold text-cyan-400">Chess vs AI Bot</h3>
-        <p className="text-zinc-400 mt-1">{status}</p>
+    <div className="flex flex-col items-center w-full max-w-md">
+      <div className="text-center mb-6">
+        <h3 className="text-xl font-bold text-cyan-400">Rock, Paper, Scissors</h3>
+        <p className="text-zinc-400 mt-1">{result}</p>
       </div>
 
-      <div className="w-full bg-zinc-950 p-2 rounded-lg border border-zinc-800 shadow-xl">
-        <Chessboard
-          {...({
-            position: fen,
-            onPieceDrop: onPieceDrop,
-            boardOrientation: "white",
-            customDarkSquareStyle: { backgroundColor: "#27272a" },
-            customLightSquareStyle: { backgroundColor: "#52525b" },
-          } as any)}
-        />
+      {/* Scoreboard */}
+      <div className="flex gap-6 mb-8 bg-zinc-950 px-6 py-3 rounded-2xl border border-zinc-800 text-sm">
+        <div className="text-center">
+          <p className="text-zinc-500">Wins</p>
+          <p className="text-green-400 font-bold text-lg">{score.wins}</p>
+        </div>
+        <div className="text-center">
+          <p className="text-zinc-500">Losses</p>
+          <p className="text-rose-400 font-bold text-lg">{score.losses}</p>
+        </div>
+        <div className="text-center">
+          <p className="text-zinc-500">Ties</p>
+          <p className="text-yellow-400 font-bold text-lg">{score.ties}</p>
+        </div>
+      </div>
+
+      {/* Arena Display */}
+      <div className="flex justify-around items-center w-full mb-8 bg-zinc-950/60 p-6 rounded-2xl border border-zinc-800">
+        <div className="text-center">
+          <p className="text-xs text-zinc-400 mb-2 font-medium">You</p>
+          <div className="w-20 h-20 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center justify-center text-4xl shadow-inner">
+            {getEmoji(playerChoice)}
+          </div>
+        </div>
+        <span className="text-2xl font-black text-zinc-600">VS</span>
+        <div className="text-center">
+          <p className="text-xs text-zinc-400 mb-2 font-medium">AI Bot</p>
+          <div className="w-20 h-20 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center justify-center text-4xl shadow-inner">
+            {getEmoji(aiChoice)}
+          </div>
+        </div>
+      </div>
+
+      {/* Selection Buttons */}
+      <div className="flex gap-4 w-full justify-center mb-6">
+        {choices.map((item) => (
+          <button
+            key={item.id}
+            onClick={() => handlePlay(item.id)}
+            className="flex-1 py-3 bg-zinc-950 hover:bg-cyan-500/10 border border-zinc-800 hover:border-cyan-500/50 rounded-xl font-medium transition-all flex flex-col items-center gap-1 active:scale-95 group"
+          >
+            <span className="text-2xl group-hover:scale-110 transition-transform">{item.emoji}</span>
+            <span className="text-xs text-zinc-300 group-hover:text-cyan-300">{item.label}</span>
+          </button>
+        ))}
       </div>
 
       <button
-        onClick={resetGame}
-        className="mt-8 px-6 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium rounded-xl transition-all border border-zinc-700 text-sm"
+        onClick={resetRps}
+        className="px-6 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium rounded-xl transition-all border border-zinc-700 text-sm"
       >
-        Restart Chess Match
+        Reset Scores
       </button>
     </div>
   );
